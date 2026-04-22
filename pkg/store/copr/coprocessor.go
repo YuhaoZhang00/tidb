@@ -1000,6 +1000,9 @@ type copIterator struct {
 
 	runawayChecker resourcegroup.RunawayChecker
 	stats          *copIteratorRuntimeStats
+
+	// One EMA per copIterator (logical scan), shared across workers.
+	ema *ruEMA
 }
 
 type liteCopIteratorWorker struct {
@@ -1030,6 +1033,8 @@ type copIteratorWorker struct {
 	storeBatchedNum         *atomic.Uint64
 	storeBatchedFallbackNum *atomic.Uint64
 	stats                   *copIteratorRuntimeStats
+
+	ema *ruEMA
 }
 
 // copIteratorTaskSender sends tasks to taskCh then wait for the workers to exit.
@@ -1691,6 +1696,12 @@ func (worker *copIteratorWorker) handleTaskOnce(bo *Backoffer, task *copTask) (*
 		BucketsVersion:  task.bucketsVer,
 	})
 	req.InputRequestSource = task.requestSource.GetRequestSource()
+	if worker.ema.IsReady() {
+		req.PredictedReadBytes = worker.ema.Predict()
+		copr_metrics.EMASendReady.Inc()
+	} else {
+		copr_metrics.EMASendCold.Inc()
+	}
 	if task.firstReadType != "" {
 		req.ReadType = task.firstReadType
 		req.IsRetryRequest = true
@@ -1839,6 +1850,22 @@ func appendScanDetail(logStr string, columnFamily string, scanInfo *kvrpcpb.Scan
 		logStr += fmt.Sprintf(" scan_processed_%s:%d", columnFamily, scanInfo.Processed)
 	}
 	return logStr
+}
+
+// pagingResponseReadBytes returns the MVCC bytes basis the EMA observes.
+// Mirrors client-go's resourcecontrol.MakeResponseInfo so the EMA learns
+// the same quantity PD bills against.
+//
+// TODO: for NextGen, PD bills max(TotalVersionsSize, ProcessedVersionsSize).
+// Mirror that here once a TiDB-side NextGen gate is available.
+func pagingResponseReadBytes(pbResp *coprocessor.Response) uint64 {
+	if pbResp == nil {
+		return 0
+	}
+	if scanDetail := pbResp.GetExecDetailsV2().GetScanDetailV2(); scanDetail != nil {
+		return scanDetail.GetProcessedVersionsSize()
+	}
+	return 0
 }
 
 func (worker *copIteratorWorker) handleCopPagingResult(bo *Backoffer, rpcCtx *tikv.RPCContext, resp *copResponse, cacheKey []byte, cacheValue *coprCacheValue, task *copTask, costTime time.Duration) (*copTaskResult, error) {

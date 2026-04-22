@@ -24,6 +24,12 @@ var (
 	CoprCacheCounterEvict prometheus.Counter
 	CoprCacheCounterHit   prometheus.Counter
 	CoprCacheCounterMiss  prometheus.Counter
+
+	// EMASendCold counts cop RPCs sent with PredictedReadBytes=0 (EMA
+	// not yet ready).
+	EMASendCold prometheus.Counter
+	// EMASendReady counts cop RPCs sent with PredictedReadBytes>0.
+	EMASendReady prometheus.Counter
 )
 
 func init() {
