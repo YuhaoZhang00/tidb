@@ -229,6 +229,7 @@ func (c *CopClient) BuildCopIterator(ctx context.Context, req *kv.Request, vars 
 		buildTaskElapsed: *buildOpt.elapsed,
 		runawayChecker:   req.RunawayChecker,
 		ema:              newRUEMA(pagingSizeBytes),
+		id:               copIteratorIDSeq.Add(1),
 	}
 	// Pipelined-dml can flush locks when it is still reading.
 	// The coprocessor of the txn should not be blocked by itself.
@@ -311,6 +312,13 @@ type copTask struct {
 	pagingSize      uint64
 	pagingSizeBytes uint64
 	pagingTaskIdx   uint32
+
+	// pagingRPCSeq counts paging RPCs sent for this copTask (1-based, set at send time).
+	// pagingPredictedBytes snapshots the EMA prediction that flowed into the most
+	// recent RPC. Both are diagnostic only, used by the copr-ema-trace log line
+	// emitted at observe time to pair (predicted, actual) per RPC.
+	pagingRPCSeq         uint32
+	pagingPredictedBytes uint64
 
 	partitionIndex int64 // used by balanceBatchCopTask in PartitionTableScan
 	requestSource  util.RequestSource
@@ -986,6 +994,10 @@ type CopInfo interface {
 	GetBuildTaskElapsed() time.Duration
 }
 
+// copIteratorIDSeq hands out process-unique ids for copIterator instances,
+// used as the `iter_id` field on the copr-ema-trace log line.
+var copIteratorIDSeq atomic.Int64
+
 type copIterator struct {
 	store                *Store
 	req                  *kv.Request
@@ -1035,6 +1047,10 @@ type copIterator struct {
 
 	// One EMA per copIterator (logical scan), shared across workers.
 	ema *ruEMA
+	// id uniquely identifies this copIterator across the process lifetime.
+	// Used as the `iter_id` label on the copr-ema-trace log so per-RPC
+	// (predicted, actual) samples can be grouped into their logical scan.
+	id int64
 }
 
 type liteCopIteratorWorker struct {
@@ -1066,7 +1082,8 @@ type copIteratorWorker struct {
 	storeBatchedFallbackNum *atomic.Uint64
 	stats                   *copIteratorRuntimeStats
 
-	ema *ruEMA
+	ema    *ruEMA
+	iterID int64
 }
 
 // copIteratorTaskSender sends tasks to taskCh then wait for the workers to exit.
@@ -1261,6 +1278,8 @@ func newCopIteratorWorker(it *copIterator, taskCh <-chan *copTask) *copIteratorW
 		storeBatchedNum:         &it.storeBatchedNum,
 		storeBatchedFallbackNum: &it.storeBatchedFallbackNum,
 		stats:                   it.stats,
+		ema:                     it.ema,
+		iterID:                  it.id,
 	}
 }
 
@@ -1730,6 +1749,11 @@ func (worker *copIteratorWorker) handleTaskOnce(bo *Backoffer, task *copTask) (*
 	})
 	req.InputRequestSource = task.requestSource.GetRequestSource()
 	req.PredictedReadBytes = worker.ema.Predict()
+	// Snapshot predicted bytes onto the task so the paired actual-bytes log
+	// at observe time (handleCopPagingResult) can emit them together. Also
+	// bump rpcSeq so paging RPCs within one copTask form a monotonic sequence.
+	task.pagingRPCSeq++
+	task.pagingPredictedBytes = req.PredictedReadBytes
 	if task.firstReadType != "" {
 		req.ReadType = task.firstReadType
 		req.IsRetryRequest = true
@@ -1915,6 +1939,25 @@ func (worker *copIteratorWorker) handleCopPagingResult(bo *Backoffer, rpcCtx *ti
 		// If the storage engine doesn't support paging protocol, it should have return all the region data.
 		// So we finish here.
 		return result, nil
+	}
+
+	readBytes := pagingResponseReadBytes(resp.pbResp)
+	// Emit one line per paging RPC so post-run Python can group by iter_id
+	// (logical scan) and rpc_seq (per-task paging step) to compare
+	// predicted-vs-actual within and across copIterators. Guarded by a
+	// failpoint-free level check: Info for now; flip to Debug if volume hurts.
+	logutil.BgLogger().Info("copr-ema-trace",
+		zap.Int64("iter_id", worker.iterID),
+		zap.Uint64("task_id", task.taskID),
+		zap.Uint32("rpc_seq", task.pagingRPCSeq),
+		zap.Uint64("region_id", task.region.GetID()),
+		zap.Uint64("predicted_bytes", task.pagingPredictedBytes),
+		zap.Uint64("actual_bytes", readBytes),
+		zap.Uint64("paging_size_bytes", task.pagingSizeBytes),
+		zap.Uint64("conn_id", worker.req.ConnID),
+	)
+	if readBytes > 0 {
+		worker.ema.Observe(readBytes, time.Now())
 	}
 
 	// calculate next ranges and grow the paging size
