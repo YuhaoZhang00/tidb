@@ -3047,28 +3047,28 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"hit\"}[1m])) by (instance, type)",
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"hit\"}[1m])) by (instance, type)",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{instance}}-hit",
                      "refId": "A"
                   },
                   {
-                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_absent\"}[1m])) by (instance, type)",
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_absent\"}[1m])) by (instance, type)",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{instance}}-miss_absent",
                      "refId": "B"
                   },
                   {
-                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_expired\"}[1m])) by (instance, type)",
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_expired\"}[1m])) by (instance, type)",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{instance}}-miss_expired",
                      "refId": "C"
                   },
                   {
-                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_bypass\"}[1m])) by (instance, type)",
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_bypass\"}[1m])) by (instance, type)",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{instance}}-miss_bypass",
@@ -3158,14 +3158,14 @@
                "steppedLine": false,
                "targets": [
                   {
-                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"hit\"}[1m])) by (instance) / sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\"}[1m])) by (instance)",
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"hit\"}[1m])) by (instance) / sum(rate(tidb_distsql_copr_ema_cache_lookup{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\"}[1m])) by (instance)",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{instance}}-hit-rate",
                      "refId": "A"
                   },
                   {
-                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_bypass\"}[1m])) by (instance) / sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\"}[1m])) by (instance)",
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_bypass\"}[1m])) by (instance) / sum(rate(tidb_distsql_copr_ema_cache_lookup{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\"}[1m])) by (instance)",
                      "format": "time_series",
                      "intervalFactor": 2,
                      "legendFormat": "{{instance}}-bypass-rate",
