@@ -18,6 +18,8 @@ import (
 	"testing"
 	"time"
 
+	copr_metrics "github.com/pingcap/tidb/pkg/store/copr/metrics"
+	"github.com/prometheus/client_golang/prometheus/testutil"
 	"github.com/stretchr/testify/require"
 )
 
@@ -71,4 +73,35 @@ func TestEMACacheKeepsActiveEntries(t *testing.T) {
 	e.Observe(2<<20, time.Now())
 	again := c.GetOrCreate("plan-A", 0)
 	require.Same(t, e, again, "fresh activity keeps the entry alive")
+}
+
+func TestEMACacheCountersTickEachBranch(t *testing.T) {
+	// Snapshot process-global counters, call GetOrCreate across all 4
+	// outcomes, then assert the delta on each pre-bound counter. Counters
+	// are monotonic so we only need before/after.
+	snap := func() (hit, absent, expired, bypass float64) {
+		return testutil.ToFloat64(copr_metrics.CoprEMACacheHit),
+			testutil.ToFloat64(copr_metrics.CoprEMACacheMissAbsent),
+			testutil.ToFloat64(copr_metrics.CoprEMACacheMissExpired),
+			testutil.ToFloat64(copr_metrics.CoprEMACacheMissBypass)
+	}
+	h0, a0, e0, b0 := snap()
+
+	c := newEMACache(50 * time.Millisecond)
+	_ = c.GetOrCreate("", 1<<20)        // miss_bypass
+	_ = c.GetOrCreate("plan-A", 1<<20)  // miss_absent
+	_ = c.GetOrCreate("plan-A", 1<<20)  // hit
+	// Force expiry on plan-A then look it up again.
+	c.mu.Lock()
+	c.m["plan-A"].ema.mu.Lock()
+	c.m["plan-A"].ema.lastObsAt = time.Now().Add(-time.Hour)
+	c.m["plan-A"].ema.mu.Unlock()
+	c.mu.Unlock()
+	_ = c.GetOrCreate("plan-A", 1<<20) // miss_expired
+
+	h1, a1, e1, b1 := snap()
+	require.Equal(t, 1.0, h1-h0, "hit tick")
+	require.Equal(t, 1.0, a1-a0, "miss_absent tick")
+	require.Equal(t, 1.0, e1-e0, "miss_expired tick")
+	require.Equal(t, 1.0, b1-b0, "miss_bypass tick")
 }

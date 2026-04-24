@@ -17,6 +17,8 @@ package copr
 import (
 	"sync"
 	"time"
+
+	copr_metrics "github.com/pingcap/tidb/pkg/store/copr/metrics"
 )
 
 // defaultEMACacheTTL is the inactivity window after which a cached EMA is
@@ -56,12 +58,19 @@ func newEMACache(ttl time.Duration) *emaCache {
 // newRUEMA — callers that lack a plan digest still get correct behavior.
 func (c *emaCache) GetOrCreate(key string, seedBytes uint64) *ruEMA {
 	if key == "" {
+		copr_metrics.CoprEMACacheMissBypass.Inc()
 		return newRUEMA(seedBytes)
 	}
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	if e, ok := c.m[key]; ok && !c.expired(e) {
-		return e.ema
+	if e, ok := c.m[key]; ok {
+		if !c.expired(e) {
+			copr_metrics.CoprEMACacheHit.Inc()
+			return e.ema
+		}
+		copr_metrics.CoprEMACacheMissExpired.Inc()
+	} else {
+		copr_metrics.CoprEMACacheMissAbsent.Inc()
 	}
 	e := &emaCacheEntry{ema: newRUEMA(seedBytes)}
 	c.m[key] = e
