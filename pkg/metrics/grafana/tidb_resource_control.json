@@ -3002,6 +3002,234 @@
             "x": 0,
             "y": 0
          },
+         "id": 79,
+         "panels": [
+            {
+               "aliasColors": {},
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "${DS_TEST-CLUSTER}",
+               "description": "Per-plan_digest EMA cache lookup outcomes per second, stacked by result. hit: cached EMA reused. miss_absent: first lookup for this plan_digest. miss_expired: entry past TTL, replaced. miss_bypass: no plan_digest provided (cache not consulted).",
+               "fill": 3,
+               "fillGradient": 0,
+               "gridPos": {
+                  "h": 7,
+                  "w": 12,
+                  "x": 0,
+                  "y": 0
+               },
+               "id": 80,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": true,
+                  "show": true,
+                  "sideWidth": null,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [],
+               "spaceLength": 10,
+               "stack": true,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"hit\"}[1m])) by (instance, type)",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{instance}}-hit",
+                     "refId": "A"
+                  },
+                  {
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_absent\"}[1m])) by (instance, type)",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{instance}}-miss_absent",
+                     "refId": "B"
+                  },
+                  {
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_expired\"}[1m])) by (instance, type)",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{instance}}-miss_expired",
+                     "refId": "C"
+                  },
+                  {
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_bypass\"}[1m])) by (instance, type)",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{instance}}-miss_bypass",
+                     "refId": "D"
+                  }
+               ],
+               "thresholds": [],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "EMA Cache Lookup Rate (by result)",
+               "tooltip": {
+                  "shared": true,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": []
+               },
+               "yaxes": [
+                  {
+                     "format": "ops",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": 0,
+                     "show": true
+                  },
+                  {
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": null,
+                     "show": true
+                  }
+               ],
+               "yaxis": {
+                  "align": false,
+                  "alignLevel": null
+               }
+            },
+            {
+               "aliasColors": {},
+               "bars": false,
+               "dashLength": 10,
+               "dashes": false,
+               "datasource": "${DS_TEST-CLUSTER}",
+               "description": "Hit rate = hit / total. Bypass rate = miss_bypass / total. High bypass indicates plan_digest is not reaching the cache (ResourceGroupTagger or PlanDigest is nil upstream).",
+               "fill": 1,
+               "fillGradient": 0,
+               "gridPos": {
+                  "h": 7,
+                  "w": 12,
+                  "x": 12,
+                  "y": 0
+               },
+               "id": 81,
+               "legend": {
+                  "alignAsTable": true,
+                  "avg": false,
+                  "current": true,
+                  "max": false,
+                  "min": false,
+                  "rightSide": true,
+                  "show": true,
+                  "sideWidth": null,
+                  "total": false,
+                  "values": true
+               },
+               "lines": true,
+               "linewidth": 1,
+               "links": [],
+               "nullPointMode": "null",
+               "percentage": false,
+               "pointradius": 5,
+               "points": false,
+               "renderer": "flot",
+               "repeat": null,
+               "seriesOverrides": [],
+               "spaceLength": 10,
+               "stack": false,
+               "steppedLine": false,
+               "targets": [
+                  {
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"hit\"}[1m])) by (instance) / sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\"}[1m])) by (instance)",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{instance}}-hit-rate",
+                     "refId": "A"
+                  },
+                  {
+                     "expr": "sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\", type=\"miss_bypass\"}[1m])) by (instance) / sum(rate(tidb_distsql_copr_ema_cache_lookup_total{k8s_cluster=\"$k8s_cluster\", tidb_cluster=\"$tidb_cluster\", instance=~\"$tidb_instance\"}[1m])) by (instance)",
+                     "format": "time_series",
+                     "intervalFactor": 2,
+                     "legendFormat": "{{instance}}-bypass-rate",
+                     "refId": "B"
+                  }
+               ],
+               "thresholds": [],
+               "timeFrom": null,
+               "timeShift": null,
+               "title": "EMA Cache Hit / Bypass Rate",
+               "tooltip": {
+                  "shared": true,
+                  "sort": 0,
+                  "value_type": "individual"
+               },
+               "type": "graph",
+               "xaxis": {
+                  "buckets": null,
+                  "mode": "time",
+                  "name": null,
+                  "show": true,
+                  "values": []
+               },
+               "yaxes": [
+                  {
+                     "format": "percentunit",
+                     "label": null,
+                     "logBase": 1,
+                     "max": 1,
+                     "min": 0,
+                     "show": true
+                  },
+                  {
+                     "format": "short",
+                     "label": null,
+                     "logBase": 1,
+                     "max": null,
+                     "min": null,
+                     "show": true
+                  }
+               ],
+               "yaxis": {
+                  "align": false,
+                  "alignLevel": null
+               }
+            }
+         ],
+         "repeat": null,
+         "repeatIteration": null,
+         "repeatRowId": null,
+         "showTitle": true,
+         "title": "EMA Cache",
+         "titleSize": "h6",
+         "type": "row"
+      },
+      {
+         "collapse": true,
+         "collapsed": true,
+         "gridPos": {
+            "h": 1,
+            "w": 24,
+            "x": 0,
+            "y": 0
+         },
          "id": 30,
          "panels": [
             {

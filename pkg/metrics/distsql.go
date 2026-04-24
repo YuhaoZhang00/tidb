@@ -26,6 +26,7 @@ var (
 	DistSQLScanKeysHistogram        prometheus.Histogram
 	DistSQLPartialCountHistogram    prometheus.Histogram
 	DistSQLCoprCacheCounter         *prometheus.CounterVec
+	DistSQLCoprEMACacheLookupCounter *prometheus.CounterVec
 	DistSQLCoprClosestReadCounter   *prometheus.CounterVec
 	DistSQLCoprRespBodySize         *prometheus.HistogramVec
 )
@@ -74,6 +75,14 @@ func InitDistSQLMetrics() {
 			Subsystem: "distsql",
 			Name:      "copr_cache",
 			Help:      "coprocessor cache hit, evict and miss number",
+		}, []string{LblType})
+
+	DistSQLCoprEMACacheLookupCounter = metricscommon.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace: "tidb",
+			Subsystem: "distsql",
+			Name:      "copr_ema_cache_lookup",
+			Help:      "per-plan_digest EMA cache lookups by result: hit, miss_absent (first time), miss_expired (TTL past), miss_bypass (no plan_digest)",
 		}, []string{LblType})
 
 	DistSQLCoprClosestReadCounter = metricscommon.NewCounterVec(

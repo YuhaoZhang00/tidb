@@ -24,6 +24,11 @@ var (
 	CoprCacheCounterEvict prometheus.Counter
 	CoprCacheCounterHit   prometheus.Counter
 	CoprCacheCounterMiss  prometheus.Counter
+
+	CoprEMACacheHit         prometheus.Counter
+	CoprEMACacheMissAbsent  prometheus.Counter
+	CoprEMACacheMissExpired prometheus.Counter
+	CoprEMACacheMissBypass  prometheus.Counter
 )
 
 func init() {
@@ -35,4 +40,9 @@ func InitMetricsVars() {
 	CoprCacheCounterEvict = metrics.DistSQLCoprCacheCounter.WithLabelValues("evict")
 	CoprCacheCounterHit = metrics.DistSQLCoprCacheCounter.WithLabelValues("hit")
 	CoprCacheCounterMiss = metrics.DistSQLCoprCacheCounter.WithLabelValues("miss")
+
+	CoprEMACacheHit = metrics.DistSQLCoprEMACacheLookupCounter.WithLabelValues("hit")
+	CoprEMACacheMissAbsent = metrics.DistSQLCoprEMACacheLookupCounter.WithLabelValues("miss_absent")
+	CoprEMACacheMissExpired = metrics.DistSQLCoprEMACacheLookupCounter.WithLabelValues("miss_expired")
+	CoprEMACacheMissBypass = metrics.DistSQLCoprEMACacheLookupCounter.WithLabelValues("miss_bypass")
 }
