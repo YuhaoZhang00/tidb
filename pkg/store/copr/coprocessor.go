@@ -1939,19 +1939,19 @@ func (worker *copIteratorWorker) handleCopPagingResult(bo *Backoffer, rpcCtx *ti
 		}
 		return result, nil
 	}
-	pagingRange := resp.pbResp.Range
-	// only paging requests need to calculate the next ranges
-	if pagingRange == nil {
-		// If the storage engine doesn't support paging protocol, it should have return all the region data.
-		// So we finish here.
-		return result, nil
-	}
-
+	// Emit one line per paging RPC, including the terminal (region drained,
+	// range == nil) one. The trace log is intentionally a strict superset of
+	// the EMA training set: the EMA below only observes non-terminal paging
+	// RPCs — the only sample class whose 'next of the same kind' is well
+	// defined within a (iter, region) sequence — while the trace log also
+	// captures the terminal RPC so offline analysis can reproduce PD's
+	// paging_prediction_residual_bytes histogram. The retry path above does
+	// not log: predicted vs actual aren't comparable across a region/lock
+	// retry. Note this is independent of which paging cap dimension is
+	// active (rows/time when tidb_paging_size_bytes=0; bytes when >0) —
+	// terminal is purely "TiKV drained the region", not "byte budget hit".
 	readBytes := pagingResponseReadBytes(resp.pbResp)
-	// Emit one line per paging RPC so post-run Python can group by iter_id
-	// (logical scan) and rpc_seq (per-task paging step) to compare
-	// predicted-vs-actual within and across copIterators. Guarded by a
-	// failpoint-free level check: Info for now; flip to Debug if volume hurts.
+	pagingRange := resp.pbResp.Range
 	logutil.BgLogger().Info("copr-ema-trace",
 		zap.Int64("iter_id", worker.iterID),
 		zap.Uint64("task_id", task.taskID),
@@ -1961,7 +1961,16 @@ func (worker *copIteratorWorker) handleCopPagingResult(bo *Backoffer, rpcCtx *ti
 		zap.Uint64("actual_bytes", readBytes),
 		zap.Uint64("paging_size_bytes", task.pagingSizeBytes),
 		zap.Uint64("conn_id", worker.req.ConnID),
+		zap.Bool("terminal", pagingRange == nil),
 	)
+
+	// only paging requests need to calculate the next ranges
+	if pagingRange == nil {
+		// If the storage engine doesn't support paging protocol, it should have return all the region data.
+		// So we finish here.
+		return result, nil
+	}
+
 	if readBytes > 0 {
 		worker.ema.Observe(readBytes, time.Now())
 	}
