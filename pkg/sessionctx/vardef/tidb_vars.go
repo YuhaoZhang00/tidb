@@ -660,6 +660,9 @@ const (
 	// TiDBEnablePipelinedWindowFunction is used to control whether to use pipelined window function, it only works when tidb_enable_window_function = true.
 	TiDBEnablePipelinedWindowFunction = "tidb_enable_pipelined_window_function"
 
+	// TiDBEnableStrictNotNullCheck is used to control whether to enable strict not-null check for single-row insert in non-strict mode.
+	TiDBEnableStrictNotNullCheck = "tidb_enable_strict_not_null_check"
+
 	// TiDBEnableStrictDoubleTypeCheck is used to control table field double type syntax check.
 	TiDBEnableStrictDoubleTypeCheck = "tidb_enable_strict_double_type_check"
 
@@ -675,6 +678,11 @@ const (
 
 	// TiDBOptEnableAdvancedJoinReorder controls whether to use the advanced join reorder framework.
 	TiDBOptEnableAdvancedJoinReorder = "tidb_opt_enable_advanced_join_reorder"
+
+	// TiDBOptJoinReorderThroughProj enables join reorder to look through projection operators
+	// when extracting join groups. This allows join reorder to work with derived columns from CTEs,
+	// views, or subqueries that have expression computations in their SELECT list.
+	TiDBOptJoinReorderThroughProj = "tidb_opt_join_reorder_through_proj"
 
 	// TiDBOptJoinReorderThroughSel enables pushing selection conditions down to
 	// reordered join trees when applicable.
@@ -1123,6 +1131,9 @@ const (
 
 	// TiDBAccelerateUserCreationUpdate decides whether tidb will load & update the whole user's data in-memory.
 	TiDBAccelerateUserCreationUpdate = "tidb_accelerate_user_creation_update"
+
+	// TiDBEnableCachePrepareStmt indicates whether to support cache prepare stmt in plan cache.
+	TiDBEnableCachePrepareStmt = "tidb_enable_cache_prepare_stmt"
 )
 
 // TiDB vars that have only global scope
@@ -1550,10 +1561,12 @@ const (
 	DefTiDBForcePriority                    = mysql.NoPriority
 	DefEnableWindowFunction                 = true
 	DefEnablePipelinedWindowFunction        = true
+	DefTiDBEnableStrictNotNullCheck         = true
 	DefEnableStrictDoubleTypeCheck          = true
 	DefEnableVectorizedExpression           = true
 	DefTiDBOptJoinReorderThreshold          = 0
 	DefTiDBOptEnableAdvancedJoinReorder     = true
+	DefTiDBOptJoinReorderThroughProj        = false
 	DefTiDBOptJoinReorderThroughSel         = false
 	DefTiDBDDLSlowOprThreshold              = 300
 	DefTiDBUseFastAnalyze                   = false
@@ -1807,6 +1820,7 @@ const (
 	DefTiDBMemArbitratorQueryReservedText             = "0"
 	DefTiDBMemArbitratorWaitAverse                    = "0"
 	DefTiDBIndexLookUpPushDownPolicy                  = IndexLookUpPushDownPolicyHintOnly
+	DefEnableCachePrepareStmt                         = false
 	// DefConnectAttrsSize is the default max aggregate byte size of connection attributes per connection.
 	// This corresponds to performance_schema_session_connect_attrs_size. In TiDB, -1 means no limit up to 64KB.
 	DefConnectAttrsSize int64 = 4096
