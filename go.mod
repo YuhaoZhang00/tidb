@@ -370,11 +370,11 @@ replace (
 	// Temporary: pin to YuhaoZhang00/kvproto rc-precharge-premium-test which adds
 	// `paging_size_bytes` to coprocessor.Request. Revert once
 	// pingcap/kvproto#1448 is merged and tagged.
-	github.com/pingcap/kvproto => github.com/YuhaoZhang00/kvproto v0.0.0-20260526080839-acfca8a6521f
+	github.com/pingcap/kvproto => github.com/YuhaoZhang00/kvproto v0.0.0-20260531165539-a7e72d8ac0fa
 	github.com/pingcap/tidb/pkg/parser => ./pkg/parser
 
 	// Temporary: pin to feature branches. Revert once tikv/client-go#1947 and tikv/pd#10611 are merged and tagged.
-	github.com/tikv/client-go/v2 => github.com/YuhaoZhang00/client-go/v2 v2.0.8-0.20260514081829-33af58c5fb00
+	github.com/tikv/client-go/v2 => github.com/YuhaoZhang00/client-go/v2 v2.0.8-0.20260531165650-69eeaeb63a3f
 	github.com/tikv/pd/client => github.com/YuhaoZhang00/pd/client v0.0.0-20260530162250-9df491e74e6b
 	// TODO: `sourcegraph.com/sourcegraph/appdash` has been archived, and the original host has been removed.
 	// Please remove these dependencies.
