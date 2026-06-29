@@ -6948,11 +6948,11 @@ def go_deps():
         build_tags = ["nextgen", "intest"],
         build_file_proto_mode = "disable_global",
         importpath = "github.com/tikv/client-go/v2",
-        sha256 = "838c40e3e6686a647be2ba408ed0b03190e40d68e0a79d200af51b6d85a6a7e4",
-        strip_prefix = "github.com/YuhaoZhang00/client-go/v2@v2.0.8-0.20260629095803-9bf656ce94ea",
+        sha256 = "7742261b386a48a21c1624c26580717085396f0afa501c019b3c391d9a13423a",
+        strip_prefix = "github.com/YuhaoZhang00/client-go/v2@v2.0.8-0.20260629104819-b76ac6aa3989",
         urls = [
-            "https://cache.hawkingrei.com/gomod/github.com/YuhaoZhang00/client-go/v2/com_github_yuhaozhang00_client_go_v2-v2.0.8-0.20260629095803-9bf656ce94ea.zip",
-            "https://storage.googleapis.com/pingcapmirror/gomod/github.com/YuhaoZhang00/client-go/v2/com_github_yuhaozhang00_client_go_v2-v2.0.8-0.20260629095803-9bf656ce94ea.zip",
+            "https://cache.hawkingrei.com/gomod/github.com/YuhaoZhang00/client-go/v2/com_github_yuhaozhang00_client_go_v2-v2.0.8-0.20260629104819-b76ac6aa3989.zip",
+            "https://storage.googleapis.com/pingcapmirror/gomod/github.com/YuhaoZhang00/client-go/v2/com_github_yuhaozhang00_client_go_v2-v2.0.8-0.20260629104819-b76ac6aa3989.zip",
         ],
     )
     go_repository(
@@ -6960,11 +6960,11 @@ def go_deps():
         build_tags = ["nextgen", "intest"],
         build_file_proto_mode = "disable_global",
         importpath = "github.com/tikv/pd/client",
-        sha256 = "befb7c3a851347c07af4fa13450ee22a84819b908584be67f1398c18c6d6d01f",
-        strip_prefix = "github.com/YuhaoZhang00/pd/client@v0.0.0-20260629094436-a6ffe5997761",
+        sha256 = "165fd436249155f88fb7154c12ee2d5b926b46412a199e2760ab98c073c8251e",
+        strip_prefix = "github.com/YuhaoZhang00/pd/client@v0.0.0-20260629104751-5013789bbe5d",
         urls = [
-            "https://cache.hawkingrei.com/gomod/github.com/YuhaoZhang00/pd/client/com_github_yuhaozhang00_pd_client-v0.0.0-20260629094436-a6ffe5997761.zip",
-            "https://storage.googleapis.com/pingcapmirror/gomod/github.com/YuhaoZhang00/pd/client/com_github_yuhaozhang00_pd_client-v0.0.0-20260629094436-a6ffe5997761.zip",
+            "https://cache.hawkingrei.com/gomod/github.com/YuhaoZhang00/pd/client/com_github_yuhaozhang00_pd_client-v0.0.0-20260629104751-5013789bbe5d.zip",
+            "https://storage.googleapis.com/pingcapmirror/gomod/github.com/YuhaoZhang00/pd/client/com_github_yuhaozhang00_pd_client-v0.0.0-20260629104751-5013789bbe5d.zip",
         ],
     )
     go_repository(
