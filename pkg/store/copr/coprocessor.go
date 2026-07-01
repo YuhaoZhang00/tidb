@@ -1711,10 +1711,20 @@ func (worker *copIteratorWorker) handleTask(ctx context.Context, task *copTask, 
 
 func (worker *copIteratorWorker) predictedReadBytesForTask(task *copTask) uint64 {
 	// PD treats PredictedReadBytes as the pre-charge signal and cannot see this task's paging state.
-	if !task.paging {
+	pagingSizeBytes := uint64(0)
+	if worker.req != nil {
+		pagingSizeBytes = worker.req.Paging.PagingSizeBytes
+	}
+	if !task.paging && pagingSizeBytes == 0 {
 		return 0
 	}
-	return worker.ema.Predict()
+	predicted := worker.ema.Predict()
+	if predicted == 0 {
+		// Cold-start: no page sample yet, fall back to the configured byte
+		// budget so the first byte-budget paging request is still pre-charged.
+		predicted = pagingSizeBytes
+	}
+	return predicted
 }
 
 // handleTaskOnce handles single copTask, successful results are send to channel.
