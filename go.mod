@@ -370,8 +370,8 @@ replace (
 	github.com/pingcap/kvproto => github.com/YuhaoZhang00/kvproto v0.0.0-20260629094258-88fa8d673cc4
 	github.com/pingcap/tidb/pkg/parser => ./pkg/parser
 
-	github.com/tikv/client-go/v2 => github.com/YuhaoZhang00/client-go/v2 v2.0.8-0.20260629104819-b76ac6aa3989
-	github.com/tikv/pd/client => github.com/YuhaoZhang00/pd/client v0.0.0-20260629104751-5013789bbe5d
+	github.com/tikv/client-go/v2 => github.com/YuhaoZhang00/client-go/v2 v2.0.8-0.20260701055224-fd855bb3893c
+	github.com/tikv/pd/client => github.com/YuhaoZhang00/pd/client v0.0.0-20260701054548-ab541e62bff7
 	// TODO: `sourcegraph.com/sourcegraph/appdash` has been archived, and the original host has been removed.
 	// Please remove these dependencies.
 	sourcegraph.com/sourcegraph/appdash => github.com/sourcegraph/appdash v0.0.0-20190731080439-ebfcffb1b5c0
